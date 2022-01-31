@@ -1,8 +1,9 @@
 aiogram
-aioredis
-environs
 SQLAlchemy
+pydantic
+python-dotenv
 asyncpg
-alembic
 loguru
-psycopg2
+httpx
+fake-useragent
+APScheduler

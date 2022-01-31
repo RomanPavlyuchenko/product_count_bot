@@ -25,5 +25,5 @@ def setup_logger(level: Union[str, int] = "DEBUG", ignored: List[str] = ""):
     logging.basicConfig(handlers=[InterceptHandler()], level=logging.getLevelName(level))
     for ignore in ignored:
         logger.disable(ignore)
-    logger.add('logs/debug.log', rotation='10 MB', compression='zip', encoding='utf-8')
+    # logger.add('logs/debug.log', rotation='10 MB', compression='zip', encoding='utf-8', colorize=True)
     logger.info('Logging is successfully configured')

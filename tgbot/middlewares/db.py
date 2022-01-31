@@ -1,7 +1,7 @@
 from aiogram import types
 from aiogram.dispatcher.middlewares import LifetimeControllerMiddleware
 
-from tgbot.models.users import User
+from tgbot.models.tables import User
 
 
 class DbMiddleware(LifetimeControllerMiddleware):
