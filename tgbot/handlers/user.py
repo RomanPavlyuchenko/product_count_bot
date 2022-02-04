@@ -47,7 +47,12 @@ async def get_article(msg: Message, state: FSMContext):
     except ValueError:
         await msg.answer("Артикул должен быть числом")
         return
-    await msg.answer("Теперь минимальный остаток")
+    amount = await service.get_stock_quantity(int(msg.text))
+    if not amount:
+        await msg.answer("Не удалось найти товар. Возможно вы ввели неправильный артикул")
+        return
+    await state.update_data(amount=amount)
+    await msg.answer(f"Текущее количество товара - {amount}. Теперь введи минимальный остаток")
     await state.set_state("get_count")
 
 
@@ -59,17 +64,13 @@ async def get_count(msg: Message, state: FSMContext):
         return
     data = await state.get_data()
     await state.finish()
-    result = await service.save_new_tracking(
+    await db_queries.add_new_tracking(
         session=msg.bot.get("db"),
         product_id=data["article"],
         count=count,
         user_id=msg.from_user.id
     )
-    if not result:
-        await msg.answer("Не удалось сохранить отслеживание. Возможно вы ввели неправильный артикул")
-        return
-    await msg.answer(f"Я сообщу когда этого товара останется всего {count} штук. "
-                     f"Текущее количество товара на складе - {result}")
+    await msg.answer(f"Я сообщу когда этого товара останется всего {count} штук.")
 
 
 def register_user(dp: Dispatcher):

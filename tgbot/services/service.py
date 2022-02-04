@@ -57,6 +57,15 @@ async def send_notification(bot: Bot, stock_quantity: dict, all_tracking: list[T
             await bot.send_message(tracking.user_id, text)
 
 
+async def get_stock_quantity(product_id) -> int | None:
+    """Функция возвращает количество товара на складе или None, если не удалось найти товар"""
+    product_info = await get_product_info(product_id)
+    if not product_info:
+        return
+    amount = calculate_stock_quantity(product_info)
+    return amount
+
+
 async def save_new_tracking(session, product_id, count, user_id) -> int | None:
     """Сохранение нового отслеживания"""
     product_info = await get_product_info(product_id)
