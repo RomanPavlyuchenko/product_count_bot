@@ -2,7 +2,7 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 
 menu = InlineKeyboardMarkup(row_width=1).add(
-    InlineKeyboardButton(text="Добавить товар", callback_data="add")
+    InlineKeyboardButton(text="Добавить в отслеживание", callback_data="add")
 )
 
 

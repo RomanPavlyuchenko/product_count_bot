@@ -43,24 +43,6 @@ async def get_count_days(msg: Message, state: FSMContext):
     await msg.answer("Готово")
 
 
-# async def begin_new_authorization_in_mpstats(msg: Message, state: FSMContext):
-#     await msg.answer("Введи e-mail")
-#     await state.set_state("get_email")
-#
-#
-# async def get_email(msg: Message, state: FSMContext):
-#     await state.update_data(email=msg.text)
-#     await msg.answer("Введи пароль")
-#     await state.set_state("get_password")
-#
-#
-# async def get_password(msg: Message, state: FSMContext):
-#     data = await state.get_data()
-#     await QueryDB(msg.bot.get("db")).update_authorization(data["email"], msg.text)
-#     await state.finish()
-#     await msg.answer("Готово")
-
-
 async def begin_broadcaster(msg: Message, state: FSMContext):
     await msg.answer("Введи текст сообщения")
     await state.set_state("get_message")
@@ -107,9 +89,6 @@ def register_admin(dp: Dispatcher):
     dp.register_message_handler(begin_add_user, commands=["add_user"], state="*", is_admin=True)
     dp.register_message_handler(get_id_user, state="get_id")
     dp.register_message_handler(get_count_days, state="get_count_days")
-    # dp.register_message_handler(begin_new_authorization_in_mpstats, commands=["authorization"], is_admin=True)
-    # dp.register_message_handler(get_email, state="get_email")
-    # dp.register_message_handler(get_password, state="get_password")
     dp.register_message_handler(begin_broadcaster, commands=["sending"], is_admin=True)
     dp.register_message_handler(sending_message, state="get_message")
     dp.register_message_handler(get_count_users, commands=["count"], is_admin=True)

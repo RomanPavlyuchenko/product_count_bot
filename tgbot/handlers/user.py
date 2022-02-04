@@ -37,7 +37,7 @@ async def btn_add_product(call: CallbackQuery, state: FSMContext):
     if not user:
         await call.message.answer(TEXTS["start"])
         return
-    await call.message.edit_text("Введи артикул товара")
+    await call.message.edit_text("Жду артикул")
     await state.set_state("get_article")
 
 
@@ -47,7 +47,7 @@ async def get_article(msg: Message, state: FSMContext):
     except ValueError:
         await msg.answer("Артикул должен быть числом")
         return
-    await msg.answer("Введи количество, меньше которого нужно присылать уведомление")
+    await msg.answer("Теперь минимальный остаток")
     await state.set_state("get_count")
 
 
@@ -68,7 +68,8 @@ async def get_count(msg: Message, state: FSMContext):
     if not result:
         await msg.answer("Не удалось сохранить отслеживание. Возможно вы ввели неправильный артикул")
         return
-    await msg.answer(f"Готово. Текущее количество товара на складе - {result}")
+    await msg.answer(f"Я сообщу когда этого товара останется всего {count} штук. "
+                     f"Текущее количество товара на складе - {result}")
 
 
 def register_user(dp: Dispatcher):
