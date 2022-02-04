@@ -35,7 +35,7 @@ async def set_commands(dp: Dispatcher):
         # BotCommand("help", "Руководство пользователя"),
         BotCommand("add_user", "Добавить пользователя бота"),
         BotCommand("sending", "Рассылка сообщения пользователям"),
-        # BotCommand("count", "Количество пользователей"),
+        BotCommand("count", "Количество пользователей"),
         BotCommand("delete_user", "Удалить пользователя")
     ]
     for admin_id in admin_ids:
