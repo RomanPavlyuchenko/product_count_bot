@@ -8,8 +8,8 @@ menu = InlineKeyboardMarkup(row_width=1).add(
 
 def subscribe():
     kb = InlineKeyboardMarkup(row_width=1).add(
-        InlineKeyboardButton(text="1 день 500р", callback_data="day"),
-        InlineKeyboardButton(text="1 месяц 2900р", callback_data="month")
+        InlineKeyboardButton(text="1 месяц 390р", callback_data="day"),
+        InlineKeyboardButton(text="1 год 4100р", callback_data="month")
     )
     return kb
 
