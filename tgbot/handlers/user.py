@@ -73,6 +73,17 @@ async def get_count(msg: Message, state: FSMContext):
     await msg.answer(f"Я сообщу когда этого товара останется всего {count} штук.")
 
 
+async def send_my_tracking(msg: Message):
+    all_tracking = await db_queries.get_tracking_by_user_id(msg.bot.get("db"), msg.from_user.id)
+    if not all_tracking:
+        await msg.answer("У вас нет отслеживаний")
+        return
+    text = "Ваши отслеживания:\n"
+    for tracking in all_tracking:
+        text += f"{tracking.product_id} - {tracking.count}\n"
+    await msg.answer(text)
+
+
 def register_user(dp: Dispatcher):
     dp.register_message_handler(user_start, commands=["start"], state="*")
     dp.register_callback_query_handler(btn_subscribe, lambda call: call.data == "day" or call.data == "month")
@@ -80,3 +91,4 @@ def register_user(dp: Dispatcher):
     dp.register_callback_query_handler(btn_add_product, lambda call: call.data == "add")
     dp.register_message_handler(get_article, state="get_article")
     dp.register_message_handler(get_count, state="get_count")
+    dp.register_message_handler(send_my_tracking, commands=["my_tracking"])

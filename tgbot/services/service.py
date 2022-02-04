@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import random
 
 from aiogram import Bot
@@ -30,7 +31,6 @@ async def get_stock_quantity_for_products(unique_product_ids: set[int]) -> dict:
     result = {}
     for product_id in unique_product_ids:
         product = await get_product_info(product_id)
-        print(product)
         if not product:
             continue
         amount = calculate_stock_quantity(product)
@@ -51,8 +51,9 @@ async def get_stock_quantity_and_all_tracking(session: AsyncSession) -> tuple[di
 async def send_notification(bot: Bot, stock_quantity: dict, all_tracking: list[Tracking]):
     """Отправляет уведомление о том, сколько товара на складе, если его меньше, чем указал пользователь"""
     for tracking in all_tracking:
-        print(f"Count - {tracking.count}. Stock - {stock_quantity.get(tracking.product_id, float('inf'))}")
-        if tracking.count > stock_quantity.get(tracking.product_id, float("inf")):
+        logging.info(f"SCU - {tracking.product_id}. Count - {tracking.count}. "
+                     f"Stock - {stock_quantity.get(tracking.product_id, float('inf'))}")
+        if tracking.count >= stock_quantity.get(tracking.product_id, float("inf")):
             text = f"Товара с артикулом {tracking.product_id} осталось - {stock_quantity[tracking.product_id]}"
             await bot.send_message(tracking.user_id, text)
 

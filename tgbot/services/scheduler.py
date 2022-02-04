@@ -15,5 +15,6 @@ def add_jobs(bot, session):
     scheduler.add_job(task_sending_notification, "cron", hour=9, args=[bot, session])
     scheduler.add_job(task_sending_notification, "cron", hour=12, args=[bot, session])
     scheduler.add_job(task_sending_notification, "cron", hour=20, args=[bot, session])
+    scheduler.add_job(task_sending_notification, "cron", hour=20, minute=30, args=[bot, session])
     # scheduler.add_job(task_sending_notification, "interval", hours=2, args=[bot, session])
     return scheduler

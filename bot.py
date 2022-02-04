@@ -28,7 +28,7 @@ async def set_commands(dp: Dispatcher):
     config = dp.bot.get('config')
     admin_ids = config.tg.admins
     await dp.bot.set_my_commands(
-        commands=[BotCommand('start', 'Старт')]
+        commands=[BotCommand('start', 'Старт'), BotCommand("my_tracking", "Мои отслеживания")]
     )
     commands_for_admin = [
         BotCommand('start', 'Старт'),
@@ -36,7 +36,8 @@ async def set_commands(dp: Dispatcher):
         BotCommand("add_user", "Добавить пользователя бота"),
         BotCommand("sending", "Рассылка сообщения пользователям"),
         BotCommand("count", "Количество пользователей"),
-        BotCommand("delete_user", "Удалить пользователя")
+        BotCommand("delete_user", "Удалить пользователя"),
+        BotCommand("my_tracking", "Мои отслеживания"),
     ]
     for admin_id in admin_ids:
         try:

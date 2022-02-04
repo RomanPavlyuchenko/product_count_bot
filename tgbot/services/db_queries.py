@@ -9,6 +9,8 @@ from tgbot.models.tables import User, Tracking
 
 async def add_new_tracking(session: AsyncSession, product_id: int, count: int, user_id: int):
     """Добавляет новое отслеживание"""
+    await session.execute(sa.delete(Tracking).where(Tracking.user_id == user_id, Tracking.product_id == product_id))
+    await session.commit()
     tracking = Tracking(user_id=user_id, product_id=product_id, count=count)
     session.add(tracking)
     try:
@@ -68,6 +70,11 @@ async def get_all_tracking(session: AsyncSession) -> list[Tracking]:
     return tracking.scalars().all()
 
 
+async def get_tracking_by_user_id(session: AsyncSession, user_id: int) -> list[Tracking] | None:
+    tracking = await session.execute(sa.select(Tracking).where(Tracking.user_id == user_id))
+    return tracking.scalars().all()
+
+
 if __name__ == '__main__':
     import asyncio
     from tgbot.services.db_connection import get_session
@@ -75,7 +82,7 @@ if __name__ == '__main__':
 
     async def main():
         session = await get_session()
-        requests = await add_user(session, 12234, 3)
+        requests = await get_tracking_by_user_id(session, 381428187)
         print(requests)
         await session.close()
 
