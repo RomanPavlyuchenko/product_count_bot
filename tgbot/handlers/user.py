@@ -117,3 +117,5 @@ def register_user(dp: Dispatcher):
     dp.register_message_handler(get_article, state="get_article")
     dp.register_message_handler(get_count, state="get_count")
     dp.register_message_handler(send_my_tracking, commands=["my_tracking"])
+    dp.register_message_handler(cmd_delete_tracking, commands=["delete_tracking"])
+    dp.register_message_handler(get_scu_for_delete, state="get_scu_for_delete")
