@@ -7,6 +7,7 @@ scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
 
 
 async def task_sending_notification(bot, session):
+    """Задача по отправке уведомления, если товара на складе меньше, чем указал пользователь"""
     stock_quantity, all_tracking = await get_stock_quantity_and_all_tracking(session)
     await send_notification(bot, stock_quantity, all_tracking)
 

@@ -2,13 +2,13 @@ from aiogram import Dispatcher
 from aiogram.dispatcher import FSMContext
 from aiogram.types import Message, CallbackQuery
 
-# from tgbot.models.tables import User
 from tgbot.keyboards import kb_user
-from tgbot.services import db_queries, service, texts
+from tgbot.services import db_queries, service
 from tgbot.services.texts import TEXTS
 
 
 async def user_start(msg: Message, state: FSMContext):
+    """Обработка команды старт"""
     await state.finish()
     user = await db_queries.get_user(msg.bot.get("db"), msg.from_user.id)
     if not user:
@@ -18,7 +18,8 @@ async def user_start(msg: Message, state: FSMContext):
     await msg.answer("Выберите действие", reply_markup=kb_user.menu)
 
 
-async def btn_subscribe(call: CallbackQuery, state: FSMContext):
+async def btn_subscribe(call: CallbackQuery):
+    """Обработка команды на покупку подписки"""
     await call.answer()
     period = "день" if call.data == "day" else "месяц"
     await call.message.answer(f"Вы выбрали 1 {period} подписки")
@@ -26,12 +27,14 @@ async def btn_subscribe(call: CallbackQuery, state: FSMContext):
 
 
 async def paid(call: CallbackQuery, state: FSMContext):
+    """Обработка команды 'Оплатил'. """
     await call.answer()
     await call.message.edit_reply_markup()
     await call.message.answer(TEXTS["paid"])
 
 
 async def btn_add_product(call: CallbackQuery, state: FSMContext):
+    """Обработка команды 'Добавить отслеживание'. """
     await call.answer()
     user = await db_queries.get_user(call.bot.get("db"), call.from_user.id)
     if not user:
@@ -42,6 +45,7 @@ async def btn_add_product(call: CallbackQuery, state: FSMContext):
 
 
 async def get_article(msg: Message, state: FSMContext):
+    """Ждет артикул товара, проверяет его количество на складе"""
     try:
         await state.update_data(article=int(msg.text))
     except ValueError:
@@ -57,6 +61,7 @@ async def get_article(msg: Message, state: FSMContext):
 
 
 async def get_count(msg: Message, state: FSMContext):
+    """Ждет количество товара, которое нужно отслеживать и сохраняет отслеживание в БД"""
     try:
         count = int(msg.text)
     except ValueError:
@@ -70,18 +75,38 @@ async def get_count(msg: Message, state: FSMContext):
         count=count,
         user_id=msg.from_user.id
     )
-    await msg.answer(f"Я сообщу когда этого товара останется всего {count} штук.")
+    await msg.answer(f"Я сообщу когда этого товара останется всего {count} штук.", reply_markup=kb_user.menu)
 
 
 async def send_my_tracking(msg: Message):
+    """Реагирует на команду 'my_tracking'. Отправляет все отслеживания пользователя"""
     all_tracking = await db_queries.get_tracking_by_user_id(msg.bot.get("db"), msg.from_user.id)
     if not all_tracking:
-        await msg.answer("У вас нет отслеживаний")
+        await msg.answer("У вас нет ни одного отслеживания")
         return
     text = "Ваши отслеживания:\n"
     for tracking in all_tracking:
         text += f"{tracking.product_id} - {tracking.count}\n"
     await msg.answer(text)
+
+
+async def cmd_delete_tracking(msg: Message, state: FSMContext):
+    await msg.answer("Введите артикул товара, который больше не нужно отслеживать")
+    await state.set_state("get_scu_for_delete")
+
+
+async def get_scu_for_delete(msg: Message, state: FSMContext):
+    try:
+        scu = int(msg.text)
+    except TypeError:
+        await msg.answer("Артикул должен быть числом")
+        return
+    await state.finish()
+    result = await db_queries.delete_tracking(msg.bot.get("db"), scu, msg.from_user.id)
+    if result:
+        await msg.answer("Готово")
+    else:
+        await msg.answer("Такого отслеживания нет. Чтобы посмотреть свои отлеживания введите команду /my_tracking")
 
 
 def register_user(dp: Dispatcher):

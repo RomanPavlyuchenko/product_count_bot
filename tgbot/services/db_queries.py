@@ -44,16 +44,24 @@ async def get_user(session: AsyncSession, user_id: int) -> User | None:
     return user.scalar()
 
 
-async def delete_user(session: AsyncSession, user_id: int):
+async def delete_user(session: AsyncSession, user_id: int) -> tuple | None:
     """Удаляет пользователя по его id"""
     result = await session.execute(sa.delete(User).where(User.id == user_id).returning("*"))
     await session.commit()
-    if result.fitst():
-        return True
-    return
+    return result.fitst()
+
+
+async def delete_tracking(session: AsyncSession, product_id: int, user_id: int) -> tuple | None:
+    """Удаляет отслеживание, которые выбрал пользователь"""
+    result = await session.execute(
+        sa.delete(Tracking).where(Tracking.product_id == product_id, Tracking.user_id == user_id).returning("*")
+    )
+    await session.commit()
+    return result.fitst()
 
 
 async def get_users(session: AsyncSession) -> list[User]:
+    """Возвращает всех пользователей"""
     users = await session.execute(sa.select(User).order_by(User.id))
     return users.scalars().all()
 
@@ -71,6 +79,7 @@ async def get_all_tracking(session: AsyncSession) -> list[Tracking]:
 
 
 async def get_tracking_by_user_id(session: AsyncSession, user_id: int) -> list[Tracking] | None:
+    """Возвращает отслеживания пользователя"""
     tracking = await session.execute(sa.select(Tracking).where(Tracking.user_id == user_id))
     return tracking.scalars().all()
 
@@ -82,7 +91,7 @@ if __name__ == '__main__':
 
     async def main():
         session = await get_session()
-        requests = await get_tracking_by_user_id(session, 381428187)
+        requests = await delete_tracking(session, 123, 381428187)
         print(requests)
         await session.close()
 

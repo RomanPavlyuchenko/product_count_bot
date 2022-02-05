@@ -81,8 +81,8 @@ async def get_id_for_delete(msg: Message, state: FSMContext):
         return
     if not result:
         await msg.answer("Такого пользователя нет")
-        return
-    await msg.answer("Готово")
+    else:
+        await msg.answer("Готово")
 
 
 def register_admin(dp: Dispatcher):

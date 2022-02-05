@@ -3,6 +3,7 @@ import logging
 import random
 
 from aiogram import Bot
+from aiogram.types import InputFile
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .db_queries import get_all_tracking, add_new_tracking
@@ -55,12 +56,17 @@ async def send_notification(bot: Bot, stock_quantity: dict, all_tracking: list[T
                      f"Stock - {stock_quantity.get(tracking.product_id, float('inf'))}")
         if tracking.count >= stock_quantity.get(tracking.product_id, float("inf")):
             text = f"Товара с артикулом {tracking.product_id} осталось - {stock_quantity[tracking.product_id]}"
-            await bot.send_message(tracking.user_id, text)
+            try:
+                file = InputFile(f"images/{tracking.product_id}.jpg")
+                await bot.send_photo(tracking.user_id, file, caption=text)
+            except Exception as er:
+                print(er)
+                await bot.send_message(tracking.user_id, text)
 
 
 async def get_stock_quantity(product_id) -> int | None:
     """Функция возвращает количество товара на складе или None, если не удалось найти товар"""
-    product_info = await get_product_info(product_id)
+    product_info = await get_product_info(product_id, True)
     if not product_info:
         return
     amount = calculate_stock_quantity(product_info)

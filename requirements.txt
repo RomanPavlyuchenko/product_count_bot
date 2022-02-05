@@ -1,9 +1,10 @@
-aiogram
-SQLAlchemy
-pydantic
+aiogram~=2.19
+SQLAlchemy~=1.4.31
+pydantic~=1.9.0
 python-dotenv
 asyncpg
-loguru
-httpx
+loguru~=0.6.0
+httpx~=0.22.0
 fake-useragent
-APScheduler
+APScheduler~=3.8.1
+beautifulsoup4~=4.10.0

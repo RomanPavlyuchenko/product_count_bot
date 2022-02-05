@@ -1,6 +1,8 @@
 import asyncio
+from pathlib import Path
 
 import httpx
+from bs4 import BeautifulSoup
 from fake_useragent import UserAgent
 
 from tgbot.models.models import Product
@@ -9,12 +11,63 @@ from tgbot.models.models import Product
 useragent = UserAgent()
 
 
-async def get_product_info(product_id: int) -> Product | None:
-    """Возвращает информацию о продукте"""
+async def get_src_with_link_to_img(client: httpx.AsyncClient, product_id: int, user_agent: str) -> str:
+    """Получает html код по scu товара, в котором есть ссылка на фото товара"""
+    headers = {
+        "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,\
+application/signed-exchange;v=b3;q=0.9",
+        "accept-encoding": "gzip, deflate, br",
+        "accept-language": "ru-RU,ru;q=0.9,en-GB;q=0.8,en-US;q=0.7,en;q=0.6",
+        "cache-control": "no-cache",
+        "dnt": "1",
+        "pragma": "no-cache",
+        "upgrade-insecure-requests": "1",
+        "user-agent": user_agent
+    }
+    response = await client.get(
+        url=f"https://www.wildberries.ru/catalog/{product_id}/detail.aspx",
+        headers=headers,
+        params={"targetUrl": "GP"},
+        timeout=60
+    )
+    return response.text
+
+
+async def download_img(client: httpx.AsyncClient, user_agent: str, link: str, product_id: int | str):
+    """Скачивает и сохраняет фотографию по ссылке"""
+    headers = {
+        "accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
+        "accept-encoding": "gzip, deflate, br",
+        "accept-language": "ru-RU,ru;q=0.9,en-GB;q=0.8,en-US;q=0.7,en;q=0.6",
+        "cache-control": "no-cache",
+        "dnt": "1",
+        "pragma": "no-cache",
+        "user-agent": user_agent
+    }
+    response = await client.get(url=link, headers=headers)
+    with open(f"images/{product_id}.jpg", "wb") as file:
+        file.write(response.content)
+
+
+def get_link_to_download_img(src: str):
+    """Находит ссылку на фото в html коде товара"""
+    soup = BeautifulSoup(src, "lxml")
+    link = soup.find("picture").find("img").get("src")
+    return f"https:{link}"
+
+
+async def get_product_info(product_id: int, is_download: bool = False) -> Product | None:
+    """
+    Возвращает информацию о продукте и скачивает фото если его еще нет
+    :param product_id: scu товара
+    :param is_download: если True скачивает фото
+    :return: Product | None
+    """
+    user_agent = useragent.random
     headers = {
         "Accept": "*/*",
         "Accept-Language": "ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3",
-        "user-agent": useragent.random
+        "user-agent": user_agent
     }
     params = {
         "spp": "0",
@@ -41,8 +94,11 @@ async def get_product_info(product_id: int) -> Product | None:
     url = "https://wbxcatalog-ru.wildberries.ru/nm-2-card/catalog"
     async with httpx.AsyncClient() as client:
         response = await client.get(url, headers=headers, params=params)
-    products = response.json()["data"]["products"]
-    if products:
-        return Product.parse_obj(products[0])
-    # return Product.parse_obj(response.json()["data"]["products"][0])
+        products = response.json()["data"]["products"]
+        if products:
+            if is_download and not Path(f"images/{product_id}.jpg").exists():
+                src = await get_src_with_link_to_img(client, product_id, user_agent)
+                link = get_link_to_download_img(src)
+                await download_img(client, user_agent, link, product_id)
+            return Product.parse_obj(products[0])
 
