@@ -8,6 +8,26 @@ from fake_useragent import UserAgent
 from tgbot.models.models import Product
 
 
+# For test
+
+# from pydantic import BaseModel, Field
+# 
+# 
+# class Stock(BaseModel):
+#     qty: int
+#     wh: int
+# 
+# 
+# class Size(BaseModel):
+#     size_name: str = Field(alias="origName")
+#     stocks: list[Stock]
+# 
+# 
+# class Product(BaseModel):
+#     sizes: list[Size]
+# End for test
+
+
 useragent = UserAgent()
 
 
@@ -30,6 +50,8 @@ application/signed-exchange;v=b3;q=0.9",
         params={"targetUrl": "GP"},
         timeout=60
     )
+    with open(f"{product_id}.html", "w") as file:
+        file.write(response.text)
     return response.text
 
 
@@ -44,7 +66,7 @@ async def download_img(client: httpx.AsyncClient, user_agent: str, link: str, pr
         "pragma": "no-cache",
         "user-agent": user_agent
     }
-    response = await client.get(url=link, headers=headers)
+    response = await client.get(url=link, headers=headers, timeout=120)
     with open(f"images/{product_id}.jpg", "wb") as file:
         file.write(response.content)
 
@@ -97,8 +119,12 @@ async def get_product_info(product_id: int, is_download: bool = False) -> Produc
         products = response.json()["data"]["products"]
         if products:
             if is_download and not Path(f"images/{product_id}.jpg").exists():
-                src = await get_src_with_link_to_img(client, product_id, user_agent)
-                link = get_link_to_download_img(src)
+                # src = await get_src_with_link_to_img(client, product_id, user_agent)
+                # link = get_link_to_download_img(src)
+                folder_images = f"{str(product_id)[0:-4]}0000"
+                link = f"https://images.wbstatic.net/big/new/{folder_images}/{product_id}-1.jpg"
                 await download_img(client, user_agent, link, product_id)
             return Product.parse_obj(products[0])
 
+
+# asyncio.run(get_product_info(79890778, True))

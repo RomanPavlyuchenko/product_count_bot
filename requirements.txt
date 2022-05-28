@@ -8,3 +8,4 @@ httpx~=0.22.0
 fake-useragent
 APScheduler~=3.8.1
 beautifulsoup4~=4.10.0
+lxml
