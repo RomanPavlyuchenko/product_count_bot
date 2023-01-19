@@ -6,7 +6,7 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.types import BotCommand, BotCommandScopeChat
 from aiogram.utils.exceptions import ChatNotFound
 
-from tgbot.config import Settings
+from tgbot.config import config
 from tgbot.filters.admin import AdminFilter
 from tgbot.handlers.admin import register_admin
 from tgbot.handlers.user import register_user
@@ -53,7 +53,6 @@ async def set_commands(dp: Dispatcher):
 
 async def main():
     setup_logger("INFO")
-    config = Settings()
     logging.info("Starting Bot")
 
     # if config.tg.use_redis:
@@ -68,12 +67,13 @@ async def main():
     bot['db'] = db_session = await get_session()
     bot.set_current(bot)
     bot_info = await bot.get_me()
+    bot.send_message(328314420, f'{bot_info["username"]}')
     logging.info(f'<yellow>Name: <b>{bot_info["first_name"]}</b>, username: {bot_info["username"]}</yellow>')
-
     # register_all_middlewares(dp)
     register_all_filters(dp)
     register_all_handlers(dp)
     await set_commands(dp)
+
     scheduler = add_jobs(bot, db_session)
 
     # start

@@ -11,6 +11,8 @@ class TgBot(DefaultConfig):
     token: str
     admins: list[int]
     use_redis: bool
+    chat_id: str
+    chat_url: str
 
 
 class DbConfig(DefaultConfig):
@@ -26,3 +28,5 @@ class DbConfig(DefaultConfig):
 class Settings(BaseSettings):
     tg: TgBot = TgBot()
     db: DbConfig = DbConfig()
+
+config = Settings()

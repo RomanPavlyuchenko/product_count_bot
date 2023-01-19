@@ -6,8 +6,9 @@ from sqlalchemy.orm import sessionmaker
 from tgbot.config import Settings
 
 config = Settings()
-DATABASE_URL = f"postgresql+asyncpg://{config.db.user}:{config.db.password}@{config.db.host}/{config.db.name}"
 
+DATABASE_URL = f"postgresql+asyncpg://{config.db.user}:{config.db.password}@{config.db.host}/{config.db.name}"
+logger.info(DATABASE_URL)
 
 engine = create_async_engine(DATABASE_URL, future=True)
 logger.info("Connected to database")

@@ -18,3 +18,4 @@ class Tracking(Base):
     user_id = sa.Column(sa.ForeignKey("users.id", ondelete="CASCADE"))
     product_id = sa.Column(sa.Integer, unique=False)
     count = sa.Column(sa.Integer)
+    count_size = sa.Column(sa.Integer)

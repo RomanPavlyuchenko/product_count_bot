@@ -114,6 +114,7 @@ async def get_product_info(product_id: int, is_download: bool = False) -> Produc
         "nm": product_id
     }
     url = "https://wbxcatalog-ru.wildberries.ru/nm-2-card/catalog"
+    url = 'https://card.wb.ru/cards/detail'
     async with httpx.AsyncClient() as client:
         response = await client.get(url, headers=headers, params=params)
         products = response.json()["data"]["products"]
@@ -125,6 +126,8 @@ async def get_product_info(product_id: int, is_download: bool = False) -> Produc
                 link = f"https://images.wbstatic.net/big/new/{folder_images}/{product_id}-1.jpg"
                 await download_img(client, user_agent, link, product_id)
             return Product.parse_obj(products[0])
+
+
 
 
 # asyncio.run(get_product_info(79890778, True))

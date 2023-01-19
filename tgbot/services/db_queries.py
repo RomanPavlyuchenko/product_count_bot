@@ -1,17 +1,18 @@
+import logging
 from datetime import date, timedelta
-
 import sqlalchemy as sa
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError, DBAPIError
 
 from tgbot.models.tables import User, Tracking
+from tgbot.config import config
 
 
-async def add_new_tracking(session: AsyncSession, product_id: int, count: int, user_id: int):
+async def add_new_tracking(session: AsyncSession, product_id: int, count: int, user_id: int, count_size: int):
     """Добавляет новое отслеживание"""
     await session.execute(sa.delete(Tracking).where(Tracking.user_id == user_id, Tracking.product_id == product_id))
     await session.commit()
-    tracking = Tracking(user_id=user_id, product_id=product_id, count=count)
+    tracking = Tracking(user_id=user_id, product_id=product_id, count=count, count_size=count_size)
     session.add(tracking)
     try:
         await session.commit()
@@ -40,15 +41,16 @@ async def add_user(session: AsyncSession, user_id: int, subscribe: int) -> bool:
 
 async def get_user(session: AsyncSession, user_id: int) -> User | None:
     """Возвращает объект пользователя если он есть в базе, иначе None"""
-    user = await session.execute(sa.select(User).where(User.id == user_id))
-    return user.scalar()
+    return True
+    # user = await session.execute(sa.select(User).where(User.id == user_id))
+    # return user.scalar()
 
 
 async def delete_user(session: AsyncSession, user_id: int) -> tuple | None:
     """Удаляет пользователя по его id"""
     result = await session.execute(sa.delete(User).where(User.id == user_id).returning("*"))
     await session.commit()
-    return result.fitst()
+    return result.first()
 
 
 async def delete_tracking(session: AsyncSession, product_id: int, user_id: int) -> tuple | None:
@@ -57,7 +59,7 @@ async def delete_tracking(session: AsyncSession, product_id: int, user_id: int) 
         sa.delete(Tracking).where(Tracking.product_id == product_id, Tracking.user_id == user_id).returning("*")
     )
     await session.commit()
-    return result.fitst()
+    return result.first()
 
 
 async def get_users(session: AsyncSession) -> list[User]:
@@ -75,6 +77,11 @@ async def remove_users_without_subscribe(session: AsyncSession):
 async def get_all_tracking(session: AsyncSession) -> list[Tracking]:
     """Возвращает все отслеживания в базе"""
     tracking = await session.execute(sa.select(Tracking).order_by(Tracking.user_id))
+    return tracking.scalars().all()
+
+async def get_admins_tracking(session: AsyncSession) -> list[Tracking]:
+    tracking = await session.execute(sa.select(Tracking).where(
+            Tracking.user_id.in_(config.tg.admins)).order_by(Tracking.user_id))
     return tracking.scalars().all()
 
 
