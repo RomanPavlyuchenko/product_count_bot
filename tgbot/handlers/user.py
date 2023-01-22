@@ -2,7 +2,8 @@ import logging
 
 from aiogram import Dispatcher
 from aiogram.dispatcher import FSMContext
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import Message, CallbackQuery, InputFile
+
 
 from tgbot.keyboards import kb_user
 from tgbot.services import db_queries, service
@@ -158,7 +159,7 @@ async def btn_get_remains(call: CallbackQuery, state: FSMContext):
     if not user:
         await call.message.answer(TEXTS["start"])
         return
-    await call.message.edit_text("Жду артикул")
+    await call.message.answer("Жду артикул")
     await state.set_state("get_article_remains")
 
 
@@ -176,10 +177,11 @@ async def get_article_remains(msg: Message, state: FSMContext):
         return
 
     if len(size_d) < 2:
-        await msg.answer(f"Текущее количество товара - {amount}", reply_markup=kb_user.menu)
+        text = f"Текущее количество товара - {amount}"
     else:
-        await msg.answer(f"Текущее количество товара - {amount}.Размеры\n{size_txt}", reply_markup=kb_user.menu)
-
+        text = f"Текущее количество товара - {amount}.Размеры\n{size_txt}"
+    file = InputFile(f"images/{article}.jpg")
+    await msg.bot.send_photo(msg.from_user.id, photo=file, caption=text, reply_markup=kb_user.menu)
     await state.finish()
 
 

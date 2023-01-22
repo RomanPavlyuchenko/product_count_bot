@@ -58,13 +58,16 @@ application/signed-exchange;v=b3;q=0.9",
 async def download_img(client: httpx.AsyncClient, user_agent: str, link: str, product_id: int | str):
     """Скачивает и сохраняет фотографию по ссылке"""
     headers = {
-        "accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
-        "accept-encoding": "gzip, deflate, br",
-        "accept-language": "ru-RU,ru;q=0.9,en-GB;q=0.8,en-US;q=0.7,en;q=0.6",
-        "cache-control": "no-cache",
-        "dnt": "1",
-        "pragma": "no-cache",
-        "user-agent": user_agent
+        # "accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
+        # "accept-encoding": "gzip, deflate, br",
+        # "accept-language": "ru-RU,ru;q=0.9,en-GB;q=0.8,en-US;q=0.7,en;q=0.6",
+        # "cache-control": "no-cache",
+        # "dnt": "1",
+        # "pragma": "no-cache",
+        # "user-agent": user_agent,
+        # "Accept-Encoding": "gzip, deflate, br",
+        # "Connection": "keep-alive",
+        # "Accept": "*/*"
     }
     response = await client.get(url=link, headers=headers, timeout=120)
     with open(f"images/{product_id}.jpg", "wb") as file:
