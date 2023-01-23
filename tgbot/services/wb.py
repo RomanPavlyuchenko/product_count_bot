@@ -70,8 +70,9 @@ async def download_img(client: httpx.AsyncClient, user_agent: str, link: str, pr
         # "Accept": "*/*"
     }
     response = await client.get(url=link, headers=headers, timeout=120)
-    with open(f"images/{product_id}.jpg", "wb") as file:
-        file.write(response.content)
+    if response.content:
+        with open(f"images/{product_id}.jpg", "wb") as file:
+            file.write(response.content)
 
 
 def get_link_to_download_img(src: str):
@@ -118,6 +119,7 @@ async def get_product_info(product_id: int, is_download: bool = False) -> Produc
     }
     url = "https://wbxcatalog-ru.wildberries.ru/nm-2-card/catalog"
     url = 'https://card.wb.ru/cards/detail'
+
     async with httpx.AsyncClient() as client:
         response = await client.get(url, headers=headers, params=params)
         products = response.json()["data"]["products"]
@@ -126,10 +128,39 @@ async def get_product_info(product_id: int, is_download: bool = False) -> Produc
                 # src = await get_src_with_link_to_img(client, product_id, user_agent)
                 # link = get_link_to_download_img(src)
                 folder_images = f"{str(product_id)[0:-4]}0000"
-                link = f"https://images.wbstatic.net/big/new/{folder_images}/{product_id}-1.jpg"
+                # link = f"https://images.wbstatic.net/big/new/{folder_images}/{product_id}-1.jpg"
+                link = get_image(product_id)
                 await download_img(client, user_agent, link, product_id)
             return Product.parse_obj(products[0])
 
+
+
+def get_image(article):
+    article = int(article)
+    part = article // 1000
+    vol = part // 100
+    if 0 <= vol <= 143:
+        host = '01'
+    elif 144 <= vol <= 287:
+        host = '02'
+    elif 288 <= vol <= 431:
+        host = '03'
+    elif 432 <= vol <= 719:
+        host = '04'
+    elif 720 <= vol <= 1007:
+        host = '05'
+    elif 1008 <= vol <= 1061:
+        host = '06'
+    elif 1062 <= vol <= 1115:
+        host = '07'
+    elif 1116 <= vol <= 1169:
+        host = '08'
+    elif 1170 <= vol <= 1313:
+        host = '09'
+    else:
+        host = '10'
+    url = f'https://basket-{host}.wb.ru/vol{vol}/part{part}/{article}/images/c516x688/1.jpg'
+    return url
 
 
 
