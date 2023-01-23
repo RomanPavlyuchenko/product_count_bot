@@ -13,10 +13,11 @@ from tgbot.config import config
 
 
 async def check_subscribe(message: Message):
-    if await message.bot.get_chat_member(
+    status = await message.bot.get_chat_member(
             chat_id=config.tg.chat_id,
             user_id=message.from_user.id
-    ):
+    )
+    if status['status'] != 'left':
         return True
     else:
         await message.answer(TEXTS['not_subscribed'], parse_mode='MarkdownV2')
