@@ -40,7 +40,7 @@ async def get_stock_quantity_for_products(unique_product_ids: set[int]) -> dict:
     """Возвращает словарь с артикулом товара и его количеством на складе"""
     result = {}
     for product_id in unique_product_ids:
-        product = await get_product_info(product_id)
+        product = await get_product_info(product_id, True)
         if not product:
             continue
         amount, size_d = calculate_stock_quantity(product)
@@ -89,7 +89,7 @@ async def get_stock_quantity(product_id) -> int | None:
 
 async def save_new_tracking(session, product_id, count, user_id, count_size) -> int | None:
     """Сохранение нового отслеживания"""
-    product_info = await get_product_info(product_id)
+    product_info = await get_product_info(product_id, True)
     if not product_info:
         return
     amount, size_d = calculate_stock_quantity(product_info)

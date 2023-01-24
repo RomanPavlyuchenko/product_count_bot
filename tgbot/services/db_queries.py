@@ -41,9 +41,8 @@ async def add_user(session: AsyncSession, user_id: int, subscribe: int) -> bool:
 
 async def get_user(session: AsyncSession, user_id: int) -> User | None:
     """Возвращает объект пользователя если он есть в базе, иначе None"""
-    return True
-    # user = await session.execute(sa.select(User).where(User.id == user_id))
-    # return user.scalar()
+    user = await session.execute(sa.select(User).where(User.id == user_id))
+    return user.scalar()
 
 
 async def delete_user(session: AsyncSession, user_id: int) -> tuple | None:

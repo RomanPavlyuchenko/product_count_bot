@@ -30,9 +30,10 @@ async def user_start(msg: Message, state: FSMContext):
         return
     user = await db_queries.get_user(msg.bot.get("db"), msg.from_user.id)
     if not user:
-        await msg.answer(TEXTS["start"])
-        await msg.answer("Оформить подписку", reply_markup=kb_user.subscribe())
-        return
+        await db_queries.add_user(msg.bot.get("db"), msg.from_user.id, 7)
+        # await msg.answer(TEXTS["start"])
+        # await msg.answer("Оформить подписку", reply_markup=kb_user.subscribe())
+        # return
     await msg.answer("Выберите действие", reply_markup=kb_user.menu)
 
 

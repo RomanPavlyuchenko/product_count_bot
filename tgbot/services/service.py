@@ -7,7 +7,7 @@ from aiogram.types import InputFile
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .db_queries import get_all_tracking, add_new_tracking, get_admins_tracking
-from .wb import get_product_info
+from .wb import download_img, get_image, get_product_info
 from ..models.models import Product
 from ..models.tables import Tracking
 
@@ -44,7 +44,7 @@ async def get_stock_quantity_for_products(unique_product_ids: set[int]) -> dict:
     """Возвращает словарь с артикулом товара и его количеством на складе"""
     result = {}
     for product_id in unique_product_ids:
-        product = await get_product_info(product_id)
+        product = await get_product_info(product_id, True)
         if not product:
             continue
         amount, size_d = calculate_stock_quantity(product)
@@ -99,9 +99,16 @@ async def send_notification(bot: Bot, stock_quantity: dict, all_tracking: list[T
             try:
                 file = InputFile(f"images/{tracking.product_id}.jpg")
                 await bot.send_photo(tracking.user_id, file, caption=text)
+            except FileNotFoundError as er:
+                await get_product_info(tracking.product_id, True)
+                file = InputFile(f"images/{tracking.product_id}.jpg")
+                await bot.send_photo(tracking.user_id, file, caption=text)
             except Exception as er:
                 print(er)
                 await bot.send_message(tracking.user_id, text)
+
+            
+            
 
 async def get_stock_quantity(product_id) -> int | None:
     """Функция возвращает количество товара на складе или None, если не удалось найти товар"""
