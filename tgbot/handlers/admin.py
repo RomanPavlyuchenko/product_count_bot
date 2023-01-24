@@ -7,6 +7,8 @@ from aiogram.dispatcher import FSMContext
 from aiogram.types import Message
 from aiogram.utils.exceptions import ChatNotFound, BotBlocked
 
+from tgbot.services.scheduler import task_sending_notification
+
 from ..services import db_queries
 
 
@@ -84,6 +86,9 @@ async def get_id_for_delete(msg: Message, state: FSMContext):
     else:
         await msg.answer("Готово")
 
+async def send_notification(msg: Message):
+    await task_sending_notification(msg.bot, msg.bot['db'], admins_only=True)
+
 
 def register_admin(dp: Dispatcher):
     dp.register_message_handler(begin_add_user, commands=["add_user"], state="*", is_admin=True)
@@ -94,3 +99,4 @@ def register_admin(dp: Dispatcher):
     dp.register_message_handler(get_count_users, commands=["count"], is_admin=True)
     dp.register_message_handler(delete_user, commands=["delete_user"], is_admin=True)
     dp.register_message_handler(get_id_for_delete, state="get_id_for_delete")
+    dp.register_message_handler(send_notification, commands=["notification"], is_admin=True)
